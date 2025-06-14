@@ -1,30 +1,48 @@
-# 🚀 Telegram Payment Gateway Checker Bot
+# 🚀 Payment Gateway & Stripe Checker Bot
 
-This is a simple but powerful **Telegram bot** built with Python that:
+A powerful **Telegram bot** built with Python that:
 
-✅ Checks any website for:  
-- Known **payment gateways** (PayPal, Stripe, Klarna, etc.)  
-- **CAPTCHA** (ReCAPTCHA, hCaptcha, Cloudflare challenges)  
-- **Cloudflare protection**  
-- Basic HTTP status and SSL info
+✅ Checks any website for:
+- **Payment gateways** (big + regional: PayPal, Stripe, Klarna, Razorpay, etc.)
+- **CAPTCHA** (ReCAPTCHA, hCaptcha)
+- **Cloudflare protection**
+- Basic **HTTP status, SSL info, IP & ISP**
 
-✅ Reports results directly in your Telegram chat.
+✅ Inspects **Stripe links & merchant sites** to detect:
+- Link type (`Checkout`, `Billing Portal`, `Invoice`)
+- Likely **3D Secure** vs **2D Secure**
+- Smart Stripe usage detection on merchant sites
 
----
-
-## 📌 Features
-
-- **Easy to use:** Just send a URL in Telegram.
-- **Secure:** Uses `.env` for secrets — never commit your bot token.
-- **Flexible:** Add or remove gateways easily.
-- **Ready for VPS or cloud hosting.**
+📥 **Get results instantly in your Telegram chat!**
 
 ---
 
-## 📂 Project Structure
+## 📌 **Commands**
+
+### `/url <website>`
+Full scan for any website.
+- Example:
+```
+/url https://example.com
+```
+
+### `/stripe <link or site>`
+Smart Stripe-specific check:
+- If you pass a **Stripe link** → Detects type & security level.
+- If you pass a **merchant site** → Checks for Stripe usage & 3D Secure clues.
+- Examples:
+```
+/stripe https://checkout.stripe.com/...
+/stripe https://billing.stripe.com/...
+/stripe https://merchantwebsite.com
+```
+
+---
+
+## 📂 **Project Structure**
 
 ```
-telegram-gateway-checker/
+Payment-Gateway-Checker-Telegram-Bot/
 ├── bot.py
 ├── requirements.txt
 ├── .env.example
@@ -34,42 +52,35 @@ telegram-gateway-checker/
 
 ---
 
-## ⚙️ How to Use
+## ⚙️ **How to Use**
 
 ### 1️⃣ Clone the repository
 
 ```bash
-git clone https://github.com/mrrifat/Payment-Gateway-Checker-Telegram-Bot.git
+git clone https://github.com/YOUR_USERNAME/Payment-Gateway-Checker-Telegram-Bot.git
 cd Payment-Gateway-Checker-Telegram-Bot
 ```
 
-### 2️⃣ Install dependencies
-
-It's recommended to use a virtual environment:
+### 2️⃣ Install dependencies (recommended: use a virtual env)
 
 ```bash
-python3 -m venv venv
-source venv/bin/activate
-```
-
-Then install dependencies:
-
-```bash
+python3 -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
 ### 3️⃣ Configure your bot token
 
-Copy the example `.env` file:
+Copy the example .env and edit:
 
 ```bash
 cp .env.example .env
 ```
 
-Edit it with your bot token from [@BotFather](https://t.me/BotFather):
+Edit `.env`:
 
 ```env
-TELEGRAM_BOT_TOKEN=YOUR_TELEGRAM_BOT_TOKEN_HERE
+TELEGRAM_BOT_TOKEN=YOUR_TELEGRAM_BOT_TOKEN
 ```
 
 ### 4️⃣ Run the bot
@@ -78,68 +89,47 @@ TELEGRAM_BOT_TOKEN=YOUR_TELEGRAM_BOT_TOKEN_HERE
 python bot.py
 ```
 
-### 5️⃣ Use it
-
-* Open Telegram.
-* Find your bot (the one you created via BotFather).
-* Click **Start**.
-* Send any website URL like `https://example.com`.
-* Get instant results about payment gateways, CAPTCHA, Cloudflare, and more!
+✅ In Telegram:
+- `/start` to confirm it works
+- `/url https://example.com`
+- `/stripe https://checkout.stripe.com/...`
 
 ---
 
 ## ☁️ Deploying on a VPS
 
-Run this bot on any Linux VPS 24/7:
+Recommended: run on a Linux server for 24/7 uptime.
 
+1. Connect to your server:
 ```bash
-# Connect to your server
 ssh user@your-vps
-
-# Pull your repo
-git clone https://github.com/YOUR_USERNAME/telegram-gateway-checker.git
-cd telegram-gateway-checker
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Create .env and add your bot token
-nano .env
-
-# Run the bot
-python bot.py
 ```
 
-👉 **Pro tip:**
-Use `screen` or `tmux` to keep it running in the background:
+2. Clone the repo & install requirements as above.
 
-```bash
-screen -S bot
-python bot.py
-# To detach: Ctrl + A, then D
-```
+3. Use a systemd service to auto-start at boot (optional but recommended).
 
 ---
 
 ## 🔒 .env & Secrets
 
-✅ Never commit your `.env` file!
-✅ This project uses `python-dotenv` to load secrets securely.
+✅ Never commit your `.env`!  
+✅ Uses `python-dotenv` to load secrets securely.
 
 ---
 
 ## ✅ Tested with
 
-* `python-telegram-bot` 20+
-* Python 3.10+
-* Linux VPS (Ubuntu 20.04+)
+- `python-telegram-bot` v20+
+- Python 3.10+
+- Linux VPS (Ubuntu 20.04+)
 
 ---
 
 ## ❤️ Contributing
 
-Pull requests are welcome!
-Feel free to suggest new payment gateways — just edit the `GATEWAYS` dictionary in `bot.py`.
+Pull requests are welcome!  
+Feel free to suggest more payment gateways or features — just open an issue or PR.
 
 ---
 
@@ -151,11 +141,10 @@ Feel free to suggest new payment gateways — just edit the `GATEWAYS` dictionar
 
 ## ⚠️ Disclaimer
 
-I am not responsible for any misuse or bad works done with this project.
-This bot is made for learning purposes only. Use responsibly and ethically.
+This bot provides best-effort checks based on visible website code & known patterns.  
+It cannot guarantee real merchant settings for 3D/2D Secure.  
+Use responsibly & ethically!
 
 ---
 
-## 🚀 Star the repo if you like it!
-
-Happy hacking and have fun!
+## 🚀 Star the repo if you like it — and enjoy!
