@@ -40,7 +40,7 @@ telegram-gateway-checker/
 
 ```bash
 git clone https://github.com/mrrifat/Payment-Gateway-Checker-Telegram-Bot.git
-cd telegram-gateway-checker
+cd Payment-Gateway-Checker-Telegram-Bot
 ```
 
 ### 2️⃣ Install dependencies
