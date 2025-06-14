@@ -6,15 +6,15 @@ import ssl
 import requests
 from urllib.parse import urlparse
 
-from dotenv import load_dotenv
+from dotenv import load_dotenv  # ✅ Correct import!
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 
-# Load .env
+# Load .env file
 load_dotenv()
 TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 
-# 🌐 Expanded payment gateways list
+# Expanded payment gateways
 GATEWAYS = [
     "PayPal", "Stripe", "Square", "Braintree", "Authorize.Net", "Worldpay",
     "Adyen", "Klarna", "Afterpay", "Affirm", "Sezzle", "Zip", "Checkout.com",
@@ -27,10 +27,10 @@ GATEWAYS = [
 # CAPTCHA indicators
 CAPTCHAS = ["recaptcha", "hcaptcha", "cloudflare challenge"]
 
-# Popular platforms (optional tech detection)
+# Popular tech/platform hints
 PLATFORMS = ["Shopify", "Angular", "React", "Vue", "Next.js", "Lit", "Gin", "Laravel", "WordPress"]
 
-# IP info helper
+# Get IP info helper
 def get_ip_info(domain):
     try:
         ip = socket.gethostbyname(domain)
@@ -52,7 +52,7 @@ def has_ssl(domain):
     except:
         return False
 
-# Main handler
+# Main URL check command
 async def check_url(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msg = update.message.text.strip()
     parts = msg.split()
@@ -65,7 +65,7 @@ async def check_url(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     url = parts[1].strip()
 
-    # Enforce HTTPS
+    # Force HTTPS
     if url.startswith("http://"):
         url = url.replace("http://", "https://", 1)
 
@@ -85,10 +85,10 @@ async def check_url(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"Error fetching URL: {e}")
         return
 
-    # SSL check
+    # SSL status
     ssl_enabled = "Yes ✅" if has_ssl(domain) else "No ❌"
 
-    # Payment gateways — with special Stripe Checkout detection
+    # Detect payment gateways + smart Stripe
     found_gateways = []
     html_lower = html.lower()
 
@@ -98,7 +98,7 @@ async def check_url(update: Update, context: ContextTypes.DEFAULT_TYPE):
         for gateway in GATEWAYS:
             if gateway.lower() in html_lower:
                 if gateway.lower() == "stripe":
-                    if ("3dsecure" in html_lower or 
+                    if ("3dsecure" in html_lower or
                         "strong customer authentication" in html_lower or
                         "sca" in html_lower):
                         found_gateways.append("Stripe (3D Secure)")
@@ -109,15 +109,15 @@ async def check_url(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     gateway_result = ", ".join(sorted(set(found_gateways))) if found_gateways else "None found"
 
-    # CAPTCHA
+    # CAPTCHA check
     found_captcha = any(c in html_lower for c in CAPTCHAS)
     captcha_result = "Detected ❌" if found_captcha else "No Captcha Detected ✅"
 
-    # Cloudflare
+    # Cloudflare check
     uses_cf = "cloudflare" in html_lower
     cf_result = "Yes ❌" if uses_cf else "No ✅"
 
-    # GraphQL
+    # GraphQL check
     graphql = "Yes" if "graphql" in html_lower else "No"
 
     # Platform detection
@@ -148,11 +148,14 @@ async def check_url(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_text(reply, parse_mode="Markdown", disable_web_page_preview=True)
 
-# Start command handler
+# /start command
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Hi! Send `/url https://example.com` to check a site.")
+    await update.message.reply_text(
+        "Hi! Send `/url https://example.com` to check a website.",
+        parse_mode="Markdown"
+    )
 
-# Run bot
+# Main run
 if __name__ == '__main__':
     app = ApplicationBuilder().token(TOKEN).build()
     app.add_handler(CommandHandler("start", start))
