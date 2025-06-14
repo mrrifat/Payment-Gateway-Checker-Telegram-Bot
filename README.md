@@ -57,7 +57,7 @@ Payment-Gateway-Checker-Telegram-Bot/
 ### 1️⃣ Clone the repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/Payment-Gateway-Checker-Telegram-Bot.git
+git clone https://github.com/mrrifat/Payment-Gateway-Checker-Telegram-Bot.git
 cd Payment-Gateway-Checker-Telegram-Bot
 ```
 
