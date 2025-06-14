@@ -39,7 +39,7 @@ telegram-gateway-checker/
 ### 1️⃣ Clone the repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/telegram-gateway-checker.git
+git clone https://github.com/mrrifat/Payment-Gateway-Checker-Telegram-Bot.git
 cd telegram-gateway-checker
 ```
 
