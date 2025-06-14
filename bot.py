@@ -1,128 +1,141 @@
-import logging
-import requests
 import os
-from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes, filters
-from dotenv import load_dotenv
+import re
+import cloudscraper
+import socket
+import ssl
+import requests
+from urllib.parse import urlparse
+from bs4 import BeautifulSoup
 
-# --- Load .env ---
+from python_dotenv import load_dotenv
+from telegram import Update
+from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes, MessageHandler, filters
+
+import json
+
+# Load .env
 load_dotenv()
 TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 
-# --- Logging ---
-logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
-)
-logger = logging.getLogger(__name__)
+# Known payment gateways
+GATEWAYS = ["PayPal", "Stripe", "Klarna", "Adyen", "Shopify", "Square", "Braintree", "Authorize.Net", "Worldpay"]
 
-# --- Payment Gateways ---
-GATEWAYS = {
-    "PayPal": "paypal.com",
-    "Stripe": "stripe.com",
-    "Authorize.Net": "authorize.net",
-    "Square": "squareup.com",
-    "Braintree": "braintreepayments.com",
-    "2Checkout": "2checkout.com",
-    "WorldPay": "worldpay.com",
-    "Skrill": "skrill.com",
-    "Razorpay": "razorpay.com",
-    "Payoneer": "payoneer.com",
-    "Coinbase Commerce": "commerce.coinbase.com",
-    "Alipay": "alipay.com",
-    "WePay": "wepay.com",
-    "Amazon Pay": "pay.amazon.com",
-    "Google Pay": "pay.google.com",
-    "Apple Pay": "apple.com/apple-pay",
-    "Klarna": "klarna.com",
-    "Afterpay": "afterpay.com",
-    "PayU": "payu.com",
-    "BlueSnap": "bluesnap.com",
-    "Mollie": "mollie.com",
-    "Adyen": "adyen.com",
-    "Revolut": "revolut.com/business",
-    "Paystack": "paystack.com",
-    "Flutterwave": "flutterwave.com",
-    "Instamojo": "instamojo.com",
-    "CCAvenue": "ccavenue.com",
-    "CyberSource": "cybersource.com",
-    "Paysafe": "paysafe.com",
-    "Dwolla": "dwolla.com",
-    "Zettle": "zettle.com",
-    "Venmo": "venmo.com",
-    "FastSpring": "fastspring.com",
-    "Checkout.com": "checkout.com",
-    "GoCardless": "gocardless.com",
-    "BitPay": "bitpay.com",
-    "Payone": "payone.com",
-    "Sage Pay": "sagepay.co.uk",
-    "Verifone": "verifone.com",
-    "Wirecard": "wirecard.com",  
-}
+# Known CAPTCHA keywords
+CAPTCHAS = ["recaptcha", "hcaptcha", "cloudflare challenge"]
 
-# --- Utils ---
-def detect_gateway(html_content):
-    return [name for name, domain in GATEWAYS.items() if domain in html_content]
+# Known platforms for quick tech detection
+PLATFORMS = ["Shopify", "Angular", "React", "Vue", "Next.js", "Lit", "Gin", "Laravel", "WordPress"]
 
-def check_captcha(html_content):
-    keywords = ['g-recaptcha', 'hcaptcha', 'data-sitekey', 'cf-captcha']
-    return [kw for kw in keywords if kw in html_content]
+# Helper to get IP and ISP
+def get_ip_info(domain):
+    try:
+        ip = socket.gethostbyname(domain)
+        response = requests.get(f"http://ip-api.com/json/{ip}").json()
+        country = response.get("country", "Unknown")
+        isp = response.get("isp", "Unknown")
+        return ip, country, isp
+    except:
+        return "N/A", "N/A", "N/A"
 
-def check_cloudflare(headers):
-    return 'cf-ray' in headers
+# Check SSL by connecting directly
+def has_ssl(domain):
+    try:
+        ctx = ssl.create_default_context()
+        with ctx.wrap_socket(socket.socket(), server_hostname=domain) as s:
+            s.settimeout(3)
+            s.connect((domain, 443))
+        return True
+    except:
+        return False
 
-# --- Handlers ---
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(
-        "👋 Send me a URL & I'll check for:\n"
-        "- Payment Gateways\n"
-        "- CAPTCHA (ReCAPTCHA, hCaptcha)\n"
-        "- Cloudflare Protection\n\n"
-        "Example: https://example.com"
-    )
+# Main URL checker
+async def check_url(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    msg = update.message.text.strip()
+    parts = msg.split()
+    if len(parts) < 2:
+        await update.message.reply_text("Please provide a URL like:\n`/url https://example.com`", parse_mode="Markdown")
+        return
 
-async def analyze(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    url = update.message.text.strip()
-    if not url.startswith("http"):
-        url = "http://" + url
+    url = parts[1].strip()
 
-    await update.message.reply_text(f"🔍 Checking: {url}")
+    # Force HTTPS
+    if url.startswith("http://"):
+        url = url.replace("http://", "https://", 1)
+
+    parsed = urlparse(url)
+    domain = parsed.netloc
+
+    scraper = cloudscraper.create_scraper()
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+    }
 
     try:
-        response = requests.get(url, timeout=15)
-        html = response.text
-        headers = response.headers
-
-        gateways = detect_gateway(html)
-        captchas = check_captcha(html)
-        cloudflare = check_cloudflare(headers)
+        response = scraper.get(url, headers=headers, timeout=10)
         status_code = response.status_code
-        ssl = url.startswith("https://")
+        html = response.text
+    except Exception as e:
+        await update.message.reply_text(f"Error fetching URL: {e}")
+        return
 
-        report = f"""
-🔗 **URL:** `{url}`
-📡 **Status Code:** {status_code}
-🔒 **SSL:** {'Yes' if ssl else 'No'}
+    # SSL check
+    ssl_enabled = "Yes ✅" if has_ssl(domain) else "No ❌"
 
-💳 **Payment Gateways:** {', '.join(gateways) if gateways else 'None found'}
-🤖 **CAPTCHA Detected:** {', '.join(captchas) if captchas else 'None'}
-🛡️ **Cloudflare:** {'Yes' if cloudflare else 'No'}
-        """
+    # Payment gateways
+    found_gateways = []
+    for gateway in GATEWAYS:
+        if re.search(gateway, html, re.IGNORECASE):
+            found_gateways.append(gateway)
+    gateway_result = ", ".join(found_gateways) if found_gateways else "None found"
 
-        await update.message.reply_markdown(report)
+    # CAPTCHA
+    found_captcha = any(c in html.lower() for c in CAPTCHAS)
+    captcha_result = "Detected ❌" if found_captcha else "No Captcha Detected ✅"
 
-    except requests.RequestException as e:
-        logger.error(f"Request error: {e}")
-        await update.message.reply_text(f"❌ Error: {e}")
+    # Cloudflare
+    uses_cf = "cloudflare" in html.lower()
+    cf_result = "Yes ❌" if uses_cf else "No ✅"
 
-# --- Main ---
-def main():
+    # GraphQL
+    graphql = "Yes" if "graphql" in html.lower() else "No"
+
+    # Platform tech
+    detected_platforms = []
+    for tech in PLATFORMS:
+        if tech.lower() in html.lower():
+            detected_platforms.append(tech)
+    platform_result = ", ".join(detected_platforms) if detected_platforms else "Unknown"
+
+    # IP, Country, ISP
+    ip, country, isp = get_ip_info(domain)
+
+    # Reply
+    reply = f"""
+🌐 *Website Information* 🌐
+
+🔗 *Site URL:* [{url}]({url})
+🔍 *HTTP Status:* `{status_code}`
+💳 *Payment Gateway:* `{gateway_result}`
+🛡️ *Captcha:* {captcha_result}
+☁️ *Cloudflare:* {cf_result}
+🔍 *GraphQL:* `{graphql}`
+🛠️ *Platform:* `{platform_result}`
+🌍 *Country:* `{country}`
+🌐 *IP Address:* `{ip}`
+📡 *ISP:* `{isp}`
+
+👤 *Checked By:* {update.effective_user.first_name}
+    """
+
+    await update.message.reply_text(reply, parse_mode="Markdown", disable_web_page_preview=True)
+
+# Start handler
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("Hi! Send `/url https://example.com` to check a site.")
+
+# Main
+if __name__ == '__main__':
     app = ApplicationBuilder().token(TOKEN).build()
-
     app.add_handler(CommandHandler("start", start))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, analyze))
-
-    logger.info("Bot is running...")
+    app.add_handler(CommandHandler("url", check_url))
     app.run_polling()
-
-if __name__ == "__main__":
-    main()
