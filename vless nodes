@@ -13,3 +13,4 @@ vless://d342d11e-d424-4583-b36e-524ab1f0afa4@visa.com:8880?encryption=none&type=
 vless://d342d11e-d424-4583-b36e-524ab1f0afa4@visa.com:8880?encryption=none&type=ws&security=none&host=korea-socks5-relay.kyanitebeforesunrise.workers.dev&path=/&ed=2560#korea-socks5
 vless://d342d11e-d424-4583-b36e-524ab1f0afa4@visa.com:8880?encryption=none&type=ws&security=none&host=uae-clean-node.kyanitebeforesunrise.workers.dev&path=/&ed=2560#uae
 vless://d342d11e-d424-4583-b36e-524ab1f0afa4@visa.com:8880?encryption=none&type=ws&security=none&host=uae-socks5-relay.kyanitebeforesunrise.workers.dev&path=/&ed=2560#uae-socks5
+vless://d342d11e-d424-4583-b36e-524ab1f0afa4@visa.com:8880?encryption=none&security=none&type=ws&host=oracle-fronting-node.kyanitebeforesunrise.workers.dev&path=%2F%3Fed%3D2560#oracle-fronting
