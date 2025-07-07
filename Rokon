@@ -1,0 +1,16 @@
+vless://d342d11e-d424-4583-b36e-524ab1f0afa4@visa.com:8880?encryption=none&type=ws&security=none&host=china.flomary.click&path=%2F%3Fed%3D2560#china
+vless://d342d11e-d424-4583-b36e-524ab1f0afa4@visa.com:8880?encryption=none&type=ws&security=none&host=us.flomary.click&path=%2F%3Fed%3D2560#us
+vless://d342d11e-d424-4583-b36e-524ab1f0afa4@visa.com:8880?encryption=none&type=ws&security=none&host=japan.flomary.click&path=%2F%3Fed%3D2560#japan
+vless://d342d11e-d424-4583-b36e-524ab1f0afa4@visa.com:8880?encryption=none&type=ws&security=none&host=hk.flomary.click&path=%2F%3Fed%3D2560#hongkong
+vless://d342d11e-d424-4583-b36e-524ab1f0afa4@visa.com:8880?encryption=none&type=ws&security=none&host=sg.flomary.click&path=%2F%3Fed%3D2560#singapore
+vless://d342d11e-d424-4583-b36e-524ab1f0afa4@visa.com:8880?encryption=none&type=ws&security=none&host=tw.flomary.click&path=%2F%3Fed%3D2560#taiwan
+vless://d342d11e-d424-4583-b36e-524ab1f0afa4@visa.com:8880?encryption=none&type=ws&security=none&host=au.flomary.click&path=%2F%3Fed%3D2560#australia
+vless://d342d11e-d424-4583-b36e-524ab1f0afa4@visa.com:8880?encryption=none&type=ws&security=none&host=de.flomary.click&path=%2F%3Fed%3D2560#germany
+vless://d342d11e-d424-4583-b36e-524ab1f0afa4@visa.com:8880?encryption=none&type=ws&security=none&host=fr.flomary.click&path=%2F%3Fed%3D2560#france
+vless://d342d11e-d424-4583-b36e-524ab1f0afa4@visa.com:8880?encryption=none&type=ws&security=none&host=in.flomary.click&path=%2F%3Fed%3D2560#india
+
+# Deep fallback & fronting focused:
+vless://d342d11e-d424-4583-b36e-524ab1f0afa4@visa.com:8880?encryption=none&type=ws&security=none&host=sk1.flomary.click&path=%2F%3Fed%3D2560#sk1-clean
+vless://d342d11e-d424-4583-b36e-524ab1f0afa4@visa.com:8880?encryption=none&type=ws&security=none&host=sk1-relay.flomary.click&path=%2F%3Fed%3D2560#sk1-relay
+vless://d342d11e-d424-4583-b36e-524ab1f0afa4@visa.com:8880?encryption=none&type=ws&security=none&host=jp2.flomary.click&path=%2F%3Fed%3D2560#jp2-relay
+vless://d342d11e-d424-4583-b36e-524ab1f0afa4@visa.com:8880?encryption=none&type=ws&security=none&host=tw2.flomary.click&path=%2F%3Fed%3D2560#tw2-relay
